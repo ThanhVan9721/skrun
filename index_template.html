@@ -30,7 +30,6 @@
 <body>
     <div class="container">
         <h1>WebSocket Control Panel</h1>
-        <button id="check-adb" onclick="checkAdbConnection()">Check ADB Connection</button>
         <button id="run-tiktok" onclick="sendMessage('1')" disabled>Run Tiktok</button>
         <button id="run-ninja" onclick="sendMessage('2')" disabled>Run Ninja</button>
         <button id="stop-1" onclick="sendMessage('stop_1')" disabled>Stop Tiktok</button>
@@ -67,14 +66,6 @@
         function sendMessage(message) {
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(message);
-            } else {
-                alert('WebSocket connection is not open.');
-            }
-        }
-
-        function checkAdbConnection() {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send('check_adb');
             } else {
                 alert('WebSocket connection is not open.');
             }

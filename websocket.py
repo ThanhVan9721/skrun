@@ -4,6 +4,7 @@ import subprocess
 import socket
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
+import time
 
 tiktok_process = None
 ninja_process = None
@@ -12,13 +13,7 @@ ninja_process = None
 async def handle_command(websocket, path):
     global tiktok_process, ninja_process
     async for message in websocket:
-        if message == "check_adb":
-            adb_connected = check_adb_connection()
-            if adb_connected:
-                await websocket.send("ADB connected")
-            else:
-                await websocket.send("ADB not connected")
-        elif message == "1":
+        if message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
                 tiktok_process = subprocess.Popen(['python3', 'tiktok.py'])
                 for i in range(5, 0, -1):
@@ -30,7 +25,6 @@ async def handle_command(websocket, path):
         elif message == "2":
             if ninja_process is None or ninja_process.poll() is not None:
                 ninja_process = subprocess.Popen(['python3', 'ninja.py'])
-                await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 for i in range(5, 0, -1):
                     await websocket.send(f"Start later: {i}")
                     await asyncio.sleep(1)  # Chờ 1 giây giữa các tin nhắn
@@ -44,12 +38,8 @@ async def handle_command(websocket, path):
                     tiktok_process.wait()
                     tiktok_process = None
                     await websocket.send("Tiktok stopped")
-                    print("Tiktok stopped")
                 except OSError:
                     await websocket.send("Tiktok is not running")
-                await websocket.send("Stopped Tiktok")
-            else:
-                await websocket.send("Tiktok is not running.")
         elif message == "stop_2":
             if ninja_process:
                 try:
@@ -57,37 +47,26 @@ async def handle_command(websocket, path):
                     ninja_process.wait()
                     ninja_process = None
                     await websocket.send("Ninja stopped")
-                    print("Ninja stopped")
                 except OSError:
                     await websocket.send("Ninja is not running")
-                await websocket.send("Stopped Ninja")
-            else:
-                await websocket.send("Ninja is not running.")
 
 # Function to check if ADB is connected
 def check_adb_connection():
     try:
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE)
         devices_output = result.stdout.decode('utf-8').strip()
-        # Kiểm tra xem có dòng "List of devices attached" trong output hay không
         if "List of devices attached" in devices_output:
-            # Lấy tất cả các dòng sau dòng "List of devices attached"
             lines = devices_output.splitlines()[1:]
             for line in lines:
-                # Nếu dòng không rỗng, kiểm tra trạng thái thiết bị
                 if line.strip():
                     device_status = line.split()[-1]
-                    # Nếu có thiết bị nhưng chưa được ủy quyền
-                    if device_status == "unauthorized":
-                        return False
-                    # Nếu có thiết bị và đã được ủy quyền
-                    elif device_status == "device":
+                    if device_status == "device":
                         return True
         return False
     except Exception as e:
         print(f"Error checking ADB connection: {e}")
         return False
-        
+
 # Function to get the Raspberry Pi's LAN IP address
 def get_lan_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -99,19 +78,12 @@ def get_lan_ip():
 
 # Function to start the HTTP server
 def start_http_server():
-    # Read the HTML template
     with open('index_template.html', 'r') as file:
         html_template = file.read()
-
-    # Replace placeholder with actual IP address
     ip_address = get_lan_ip()
     html_content = html_template.replace('{{IP_ADDRESS}}', ip_address)
-
-    # Write the updated HTML content to index.html
     with open('index.html', 'w') as file:
         file.write(html_content)
-
-    # Start the HTTP server
     handler = SimpleHTTPRequestHandler
     httpd = HTTPServer(('', 8000), handler)
     print(f"HTTP server started on http://{ip_address}:8000")
@@ -123,12 +95,21 @@ async def start_websocket_server(ip_address):
         print(f"WebSocket server started on ws://{ip_address}:8765")
         await asyncio.Future()  # Run forever
 
-if __name__ == "__main__":
-    # Start the HTTP server in a new thread
-    http_thread = threading.Thread(target=start_http_server)
-    http_thread.daemon = True  # Ensure it exits when the main program exits
-    http_thread.start()
+# Function to continuously check ADB connection
+async def monitor_adb_connection():
+    while True:
+        if check_adb_connection():
+            ip_address = get_lan_ip()
+            # Start the HTTP server in a new thread
+            http_thread = threading.Thread(target=start_http_server)
+            http_thread.daemon = True
+            http_thread.start()
+            # Start the WebSocket server
+            await start_websocket_server(ip_address)
+            break
+        else:
+            print("ADB not connected. Retrying in 10 seconds...")
+            await asyncio.sleep(10)  # Wait before retrying
 
-    # Start the WebSocket server
-    ip_address = get_lan_ip()
-    asyncio.run(start_websocket_server(ip_address))
+if __name__ == "__main__":
+    asyncio.run(monitor_adb_connection())
