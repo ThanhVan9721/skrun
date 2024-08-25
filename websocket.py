@@ -24,7 +24,7 @@ async def handle_command(websocket, path):
         elif message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
                 tiktok_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'tiktok.py'])
-                tiktok_pid = tiktok_process
+                tiktok_pid = tiktok_process.pid
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Tiktok job")
             else:
@@ -32,7 +32,7 @@ async def handle_command(websocket, path):
         elif message == "2":
             if ninja_process is None or ninja_process.poll() is not None:
                 ninja_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'ninja.py'])
-                ninja_pid = ninja_process
+                ninja_pid = ninja_process.pid
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Ninja")
             else:
