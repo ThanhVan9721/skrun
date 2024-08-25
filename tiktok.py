@@ -8,7 +8,7 @@ import requests
 import random
 import re
 
-model = YOLO('/home/admin/test/best.pt')  # Thay bằng mô hình bạn đã huấn luyện
+model = YOLO('/home/admin/skrun/best.pt')  # Thay bằng mô hình bạn đã huấn luyện
 
 # Đường dẫn đến thư mục lưu trữ ảnh
 output_folder = "detected_images"
