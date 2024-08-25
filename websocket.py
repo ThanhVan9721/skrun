@@ -23,7 +23,7 @@ async def handle_command(websocket, path):
                 await websocket.send("ADB not connected")
         elif message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
-                tiktok_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'tiktok.py'])
+                tiktok_process = subprocess.Popen(['python3', 'abc.py'])
                 tiktok_pid = tiktok_process.pid
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Tiktok job")
@@ -40,8 +40,9 @@ async def handle_command(websocket, path):
         elif message == "stop_1":
             if tiktok_pid:
                 try:
-                    subprocess.call(['pkill', '-f', 'lxterminal.*python3 tiktok.py'])
-                    tiktok_pid = None
+                    tiktok_process.terminate()
+                    tiktok_process.wait()
+                    tiktok_process = None
                     await websocket.send("Tiktok stopped")
                 except OSError:
                     await websocket.send("Tiktok is not running")
