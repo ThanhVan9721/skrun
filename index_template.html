@@ -51,6 +51,8 @@
             if (event.data === 'ADB connected') {
                 document.getElementById('run-tiktok').disabled = false;
                 document.getElementById('run-ninja').disabled = false;
+                document.getElementById('stop-1').disabled = false;
+                document.getElementById('stop-2').disabled = false;
             }
         };
 
@@ -65,11 +67,6 @@
         function sendMessage(message) {
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(message);
-                if (message === '1') {
-                    document.getElementById('stop-1').disabled = false;
-                } else if (message === '2') {
-                    document.getElementById('stop-2').disabled = false;
-                }
             } else {
                 alert('WebSocket connection is not open.');
             }

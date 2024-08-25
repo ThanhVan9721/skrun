@@ -41,6 +41,8 @@ async def handle_command(websocket, path):
             if tiktok_pid:
                 try:
                     os.kill(tiktok_pid, signal.SIGTERM)
+                    tiktok_process.terminate()
+                    tiktok_process = None
                     tiktok_pid = None
                     await websocket.send("Tiktok stopped")
                 except OSError:
