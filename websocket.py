@@ -13,7 +13,6 @@ ninja_process = None
 # Function to handle WebSocket commands
 async def handle_command(websocket, path):
     global tiktok_process, ninja_process
-    global tiktok_pid, ninja_pid
     async for message in websocket:
         if message == "check_adb":
             adb_connected = check_adb_connection()
@@ -24,37 +23,43 @@ async def handle_command(websocket, path):
         elif message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
                 tiktok_process = subprocess.Popen(['python3', 'tiktok.py'])
-                tiktok_pid = tiktok_process.pid
-                await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
+                for i in range(5, 0, -1):
+                    await websocket.send(f"Start later: {i}")
+                    await asyncio.sleep(1)  # Chờ 1 giây giữa các tin nhắn
                 await websocket.send("Start Tiktok job")
             else:
                 await websocket.send("Tiktok job is already running.")
         elif message == "2":
             if ninja_process is None or ninja_process.poll() is not None:
-                ninja_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'ninja.py'])
-                ninja_pid = ninja_process.pid
+                ninja_process = subprocess.Popen(['python3', 'ninja.py'])
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
+                for i in range(5, 0, -1):
+                    await websocket.send(f"Start later: {i}")
+                    await asyncio.sleep(1)  # Chờ 1 giây giữa các tin nhắn
                 await websocket.send("Start Ninja")
             else:
                 await websocket.send("Ninja is already running.")
         elif message == "stop_1":
-            if tiktok_pid:
+            if tiktok_process:
                 try:
                     tiktok_process.terminate()
                     tiktok_process.wait()
                     tiktok_process = None
                     await websocket.send("Tiktok stopped")
+                    print("Tiktok stopped")
                 except OSError:
                     await websocket.send("Tiktok is not running")
                 await websocket.send("Stopped Tiktok")
             else:
                 await websocket.send("Tiktok is not running.")
         elif message == "stop_2":
-            if ninja_pid:
+            if ninja_process:
                 try:
-                    os.kill(ninja_pid, signal.SIGTERM)
-                    ninja_pid = None
+                    ninja_process.terminate()
+                    ninja_process.wait()
+                    ninja_process = None
                     await websocket.send("Ninja stopped")
+                    print("Ninja stopped")
                 except OSError:
                     await websocket.send("Ninja is not running")
                 await websocket.send("Stopped Ninja")
