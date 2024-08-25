@@ -52,15 +52,26 @@ async def handle_command(websocket, path):
 def check_adb_connection():
     try:
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE)
-        devices_output = result.stdout.decode('utf-8')
-        # Check if there are any devices connected (other than the "List of devices attached" line)
-        if len(devices_output.splitlines()) > 1:
-            return True
+        devices_output = result.stdout.decode('utf-8').strip()
+        # Kiểm tra xem có dòng "List of devices attached" trong output hay không
+        if "List of devices attached" in devices_output:
+            # Lấy tất cả các dòng sau dòng "List of devices attached"
+            lines = devices_output.splitlines()[1:]
+            for line in lines:
+                # Nếu dòng không rỗng, kiểm tra trạng thái thiết bị
+                if line.strip():
+                    device_status = line.split()[-1]
+                    # Nếu có thiết bị nhưng chưa được ủy quyền
+                    if device_status == "unauthorized":
+                        return False
+                    # Nếu có thiết bị và đã được ủy quyền
+                    elif device_status == "device":
+                        return True
         return False
     except Exception as e:
         print(f"Error checking ADB connection: {e}")
         return False
-
+        
 # Function to get the Raspberry Pi's LAN IP address
 def get_lan_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
