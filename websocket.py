@@ -4,9 +4,7 @@ import subprocess
 import socket
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
-import os
-import signal
-# Global variables to store PIDs
+
 tiktok_process = None
 ninja_process = None
 
