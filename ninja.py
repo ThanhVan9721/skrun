@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import math
 
 # Tải mô hình YOLOv8 đã huấn luyện
-model = YOLO('/home/admin/test/best-1.pt')  # Thay bằng mô hình bạn đã huấn luyện
+model = YOLO('/home/admin/skrun/best-1.pt')  # Thay bằng mô hình bạn đã huấn luyện
 
 import subprocess
 
