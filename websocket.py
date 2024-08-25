@@ -23,7 +23,7 @@ async def handle_command(websocket, path):
                 await websocket.send("ADB not connected")
         elif message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
-                tiktok_process = subprocess.Popen(['python3', 'abc.py'])
+                tiktok_process = subprocess.Popen(['python3', 'tiktok.py'])
                 tiktok_pid = tiktok_process.pid
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Tiktok job")
