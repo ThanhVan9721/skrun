@@ -247,17 +247,7 @@ def tap_center_of_screen():
     # Thực hiện thao tác bấm vào giữa màn hình
     subprocess.run(f'adb shell input tap {center_x} {center_y}', shell=True)
 
-def adb_input_textsss():
-    subprocess.run('adb shell am start -a android.intent.action.VIEW -d "https://www.rapidtables.com/tools/notepad.html"', shell=True)
-    time.sleep(2)
-    tap_center_of_screen()
-    for i in range(5, 0, -1):
-        subprocess.run(f'adb shell input text "Bat-dau-sau:_{i}"', shell=True)
-        subprocess.run('adb shell input keyevent 66', shell=True)
-        time.sleep(1)
-
 for _ in range(30):
-    adb_input_textsss()
     try:
         execute_multiple_times()        
         run_job(869386)
