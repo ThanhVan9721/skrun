@@ -51,17 +51,8 @@ def process_frame(img):
 
     return cot_distance
 def calculate_hold_time(pixels_required, increase_per_step=1, time_per_step=0.01):
-    """
-    Tính thời gian giữ màn hình cần thiết để đạt được số pixel yêu cầu.
-
-    :param pixels_required: Số pixel yêu cầu.
-    :param increase_per_step: Số pixel tăng lên sau mỗi bước (mặc định là 1px).
-    :param time_per_step: Thời gian cho mỗi bước (mặc định là 0.01 giây).
-    :return: Thời gian giữ màn hình (tính bằng giây).
-    """
     if increase_per_step <= 0 or time_per_step <= 0:
         raise ValueError("Số pixel tăng lên và thời gian mỗi bước phải lớn hơn 0.")
-
     hold_time = pixels_required * time_per_step
     return hold_time
 
@@ -69,14 +60,6 @@ def long_press_on_screen(cot_distance):
     """Nhấn giữ màn hình ở một điểm bất kỳ trong một thời gian nhất định."""
     print(cot_distance)
     duration = calculate_hold_time(cot_distance, increase_per_step=1, time_per_step=0.00023)
-    # if cot_distance > 700:
-    #     duration = calculate_hold_time(cot_distance, increase_per_step=1, time_per_step=0.00035)
-    # if cot_distance > 600:
-    #     duration = calculate_hold_time(cot_distance, increase_per_step=1, time_per_step=0.00023)
-    # if cot_distance > 550:
-    #     duration = calculate_hold_time(cot_distance, increase_per_step=1, time_per_step=0.0002)
-    # if cot_distance <= 550:
-    #     duration = calculate_hold_time(cot_distance, increase_per_step=1, time_per_step=0.0004)
     hold_time_milliseconds = int(duration * 1000)
     print(duration)
     os.system(f"adb shell input swipe 540 960 540 960 {hold_time_milliseconds}")
@@ -87,7 +70,6 @@ def main():
         cot_distance = process_frame(img)
 
         if cot_distance is not None:
-            print(f"Nhấn giữ màn hình do khoảng cách đạt yêu cầu.")
             long_press_on_screen(cot_distance)  # Nhấn giữ màn hình
         
         time.sleep(1.06)
