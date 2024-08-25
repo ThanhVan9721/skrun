@@ -4,7 +4,8 @@ import subprocess
 import socket
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
-
+import os
+import signal
 # Global variables to store PIDs
 tiktok_process = None
 ninja_process = None
@@ -12,6 +13,7 @@ ninja_process = None
 # Function to handle WebSocket commands
 async def handle_command(websocket, path):
     global tiktok_process, ninja_process
+    global tiktok_pid, ninja_pid
     async for message in websocket:
         if message == "check_adb":
             adb_connected = check_adb_connection()
@@ -22,6 +24,7 @@ async def handle_command(websocket, path):
         elif message == "1":
             if tiktok_process is None or tiktok_process.poll() is not None:
                 tiktok_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'tiktok.py'])
+                tiktok_pid = tiktok_process
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Tiktok job")
             else:
@@ -29,24 +32,33 @@ async def handle_command(websocket, path):
         elif message == "2":
             if ninja_process is None or ninja_process.poll() is not None:
                 ninja_process = subprocess.Popen(['lxterminal', '-e', 'python3', 'ninja.py'])
+                ninja_pid = ninja_process
                 await asyncio.gather(*(websocket.send(f"Start later: {i}") for i in range(5, 0, -1)))
                 await websocket.send("Start Ninja")
             else:
                 await websocket.send("Ninja is already running.")
         elif message == "stop_1":
-            if tiktok_process is not None and tiktok_process.poll() is None:
-                tiktok_process.terminate()
-                await websocket.send("Stopped abc.py")
+            if tiktok_pid:
+                try:
+                    os.kill(tiktok_pid, signal.SIGTERM)
+                    tiktok_pid = None
+                    await websocket.send("Tiktok stopped")
+                except OSError:
+                    await websocket.send("Tiktok is not running")
+                await websocket.send("Stopped Tiktok")
             else:
-                await websocket.send("abc.py is not running.")
+                await websocket.send("Tiktok is not running.")
         elif message == "stop_2":
-            if ninja_process is not None and ninja_process.poll() is None:
-                ninja_process.terminate()
-                await websocket.send("Stopped dfc.py")
+            if ninja_pid:
+                try:
+                    os.kill(ninja_pid, signal.SIGTERM)
+                    ninja_pid = None
+                    await websocket.send("Ninja stopped")
+                except OSError:
+                    await websocket.send("Ninja is not running")
+                await websocket.send("Stopped Ninja")
             else:
-                await websocket.send("dfc.py is not running.")
-        else:
-            await websocket.send("Invalid option. Please choose 1, 2, stop_abc, or stop_dfc.")
+                await websocket.send("Ninja is not running.")
 
 # Function to check if ADB is connected
 def check_adb_connection():
