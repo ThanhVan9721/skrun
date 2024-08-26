@@ -106,6 +106,7 @@ def start_http_server():
     handler = SimpleHTTPRequestHandler
     httpd = HTTPServer(('', 8000), handler)
     print(f"HTTP server started on http://{ip_address}:8000")
+    subprocess.run(f'adb shell am start -a android.intent.action.VIEW -d "http://{ip_address}:8000"', shell=True)
     httpd.serve_forever()
 
 # Function to start the WebSocket server
