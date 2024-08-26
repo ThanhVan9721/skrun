@@ -29,12 +29,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>WebSocket Control Panel</h1>
-        <button id="run-tiktok" onclick="sendMessage('1')" disabled>Run Tiktok</button>
-        <button id="run-ninja" onclick="sendMessage('2')" disabled>Run Ninja</button>
-        <button id="stop-1" onclick="sendMessage('stop_1')" disabled>Stop Tiktok</button>
-        <button id="stop-2" onclick="sendMessage('stop_2')" disabled>Stop Ninja</button>
-        <p id="response">No command sent yet.</p>
+        <h1>Welcome to Nao Tool V.1.0</h1>
+        <button id="run-tiktok" onclick="sendMessage('1')">Run Tiktok</button>
+        <button id="run-ninja" onclick="sendMessage('2')">Run Ninja</button>
+        <button id="stop-1" onclick="sendMessage('stop_1')">Stop Tiktok</button>
+        <button id="stop-2" onclick="sendMessage('stop_2')">Stop Ninja</button>
+        <p id="response">To be sure, press close tools.</p>
     </div>
 
     <script>
@@ -47,12 +47,6 @@
 
         ws.onmessage = (event) => {
             document.getElementById('response').textContent = 'Server: ' + event.data;
-            if (event.data === 'ADB connected') {
-                document.getElementById('run-tiktok').disabled = false;
-                document.getElementById('run-ninja').disabled = false;
-                document.getElementById('stop-1').disabled = false;
-                document.getElementById('stop-2').disabled = false;
-            }
         };
 
         ws.onclose = () => {
