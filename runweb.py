@@ -13,8 +13,8 @@ def run_websocket_in_terminal():
             print("DISPLAY variable is not set. Setting DISPLAY to :0")
             os.environ['DISPLAY'] = ':0'
 
-        # Mở lxterminal và chạy websocket.py
-        subprocess.Popen(['lxterminal', '--command', 'python3 /home/admin/skrun/websocket.py'])
+        # Mở lxterminal và chạy websocket.py từ thư mục /home/admin/skrun
+        subprocess.Popen(['lxterminal', '--command', 'bash -c "cd /home/admin/skrun && python3 websocket.py"'])
         print("lxterminal opened and websocket.py is running.")
         
     except Exception as e:
