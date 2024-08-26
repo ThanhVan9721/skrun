@@ -1,8 +1,12 @@
 import subprocess
 import os
+import time
 
 def run_websocket_in_terminal():
     try:
+        # Chờ 10 giây để đảm bảo môi trường GUI đã sẵn sàng
+        time.sleep(10)
+        
         # Kiểm tra biến môi trường DISPLAY
         display = os.getenv('DISPLAY')
         if not display:
