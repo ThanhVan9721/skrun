@@ -94,13 +94,13 @@ def get_lan_ip():
 
 # Function to start the HTTP server
 def start_http_server():
-    with open('index_template.html', 'r') as file:
+    with open('/home/admin/skrun/index_template.html', 'r') as file:
         html_template = file.read()
 
     ip_address = get_lan_ip()
     html_content = html_template.replace('{{IP_ADDRESS}}', ip_address)
 
-    with open('index.html', 'w') as file:
+    with open('/home/admin/skrun/index.html', 'w') as file:
         file.write(html_content)
 
     handler = SimpleHTTPRequestHandler
