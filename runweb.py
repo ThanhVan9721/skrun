@@ -1,3 +1,3 @@
 import subprocess
 
-subprocess.Popen(['python3', 'websocket.py'])
+subprocess.Popen(['gnome-terminal', '--', 'python3', '/home/admin/skrun/websocket.py'])
