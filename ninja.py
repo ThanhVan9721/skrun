@@ -72,7 +72,7 @@ def main():
         if cot_distance is not None:
             long_press_on_screen(cot_distance)  # Nhấn giữ màn hình
         
-        time.sleep(1.06)
+        time.sleep(1)
         
 
 if __name__ == "__main__":
