@@ -41,7 +41,11 @@ async def handle_command(websocket):
             process.wait()
             process = None
             job_name = None
-            await websocket.send("Job is stop.")
+            await websocket.send("All jobs have been stopped.")
+        elif message == "shutdown":
+            await websocket.send("Device turned off")
+            process = subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
+
     
 
 

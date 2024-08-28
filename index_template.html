@@ -30,6 +30,10 @@
             color: white;  
         }
         .stop-job{
+            background-color: cadetblue;
+            color: white;
+        }
+        .shutdown{
             background-color: rgb(228, 57, 57);
             color: white;
         }
@@ -37,12 +41,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Nao Tool V.1.0</h1>
+        <h1>Welcome to TDB Tool</h1>
         <h1>V.1.0</h1>
         <div id="menu">
             <button class="menu-chill" onclick="getGolike()">GoLike Tool</button>
             <button class="menu-chill" onclick="getXworld()">Xworld Tool</button>
-            <button class="stop-job" onclick="sendMessage('stop')">Stop all job</button>
+            <div>
+                <button class="stop-job" onclick="sendMessage('stop')">Stop All Job</button>
+                <button class="shutdown" onclick="sendMessage('shutdown')">Shutdown Devices</button>
+            </div>
+            
         </div>
         <p id="response">To be sure, press close tools.</p>
     </div>
@@ -77,13 +85,17 @@
         function getGolike() {
             var menu = document.getElementById("menu");
             menu.innerHTML = `<button id="run-tiktok" onclick="sendMessage('1')">Run Tiktok</button>
-                              <button onclick="backMenu()" class="menu-chill">Back To Menu</button>`;
+                              <div>
+                                <button onclick="backMenu()" class="menu-chill">Back To Menu</button>
+                              </div>`;
         }
 
         function getXworld() {
             var menu = document.getElementById("menu");
             menu.innerHTML = `<button id="run-ninja" onclick="sendMessage('2')">Run Ninja</button>
-                              <button onclick="backMenu()" class="menu-chill">Back To Menu</button>`;
+                              <div>
+                                <button onclick="backMenu()" class="menu-chill">Back To Menu</button>
+                              </div>`;
         }
 
         function sendMessage(message) {
