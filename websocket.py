@@ -5,18 +5,19 @@ import socket
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
 
+process = None
+job_name = None
 # Function to handle WebSocket commands
 async def handle_command(websocket):
-    global process, job_name
     async for message in websocket:
         if message == "1":
             job_name = "Tiktok"
             job_path = "tiktok.py"
-            await run_job(websocket, process, job_name, job_path)
+            await run_job(websocket,  job_path)
         elif message == "2":
             job_name = "Ninja"
             job_path = "ninja.py"
-            await run_job(websocket, process, job_name, job_path)
+            await run_job(websocket, job_path)
         elif message == "stop":
             process.terminate()
             process.wait()
@@ -24,7 +25,7 @@ async def handle_command(websocket):
             job_name = None
             await websocket.send("Job is stop.")
 
-async def run_job(websocket, process, job_name, job_path):
+async def run_job(websocket, job_path):
     if process is None or process.poll() is not None:
         process = subprocess.Popen(['python3', job_path])
         for i in range(5, 0, -1):
