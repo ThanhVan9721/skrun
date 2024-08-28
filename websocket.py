@@ -30,30 +30,15 @@ async def handle_command(websocket, path):
                 await websocket.send("Start Ninja")
             else:
                 await websocket.send("Ninja is already running.")
-        elif message == "stop_1":
-            if tiktok_process:
-                try:
-                    tiktok_process.terminate()
-                    tiktok_process.wait()
-                    tiktok_process = None
-                    await websocket.send("Tiktok stopped")
-                    print("Tiktok stopped")
-                except OSError:
-                    await websocket.send("Tiktok is not running")
-            else:
-                await websocket.send("Tiktok is not running.")
-        elif message == "stop_2":
-            if ninja_process:
-                try:
-                    ninja_process.terminate()
-                    ninja_process.wait()
-                    ninja_process = None
-                    await websocket.send("Ninja stopped")
-                    print("Ninja stopped")
-                except OSError:
-                    await websocket.send("Ninja is not running")
-            else:
-                await websocket.send("Ninja is not running.")
+        elif message == "stop":
+            tiktok_process.terminate()
+            tiktok_process.wait()
+            tiktok_process = None
+            ninja_process.terminate()
+            ninja_process.wait()
+            ninja_process = None
+            await websocket.send("All job is stop.")
+
 
 # Function to check if ADB is connected
 def check_adb_connection():

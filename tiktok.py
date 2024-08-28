@@ -251,5 +251,6 @@ for _ in range(30):
     try:
         execute_multiple_times()        
         run_job(869386)
+        print(f"End job")
     except Exception as e:
         print(f"Có lỗi xảy ra: {e}")

@@ -25,15 +25,25 @@
             font-size: 18px;
             color: green;
         }
+        .menu-chill{
+            background-color: rgb(57, 88, 228);
+            color: white;  
+        }
+        .stop-job{
+            background-color: rgb(228, 57, 57);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Nao Tool V.1.0</h1>
-        <button id="run-tiktok" onclick="sendMessage('1')">Run Tiktok</button>
-        <button id="run-ninja" onclick="sendMessage('2')">Run Ninja</button>
-        <button id="stop-1" onclick="sendMessage('stop_1')">Stop Tiktok</button>
-        <button id="stop-2" onclick="sendMessage('stop_2')">Stop Ninja</button>
+        <h1>V.1.0</h1>
+        <div id="menu">
+            <button class="menu-chill" onclick="getGolike()">GoLike Tool</button>
+            <button class="menu-chill" onclick="getXworld()">Xworld Tool</button>
+            <button class="stop-job" onclick="sendMessage('stop')">Stop all job</button>
+        </div>
         <p id="response">To be sure, press close tools.</p>
     </div>
 
@@ -56,6 +66,25 @@
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
+
+        var menubk = document.getElementById("menu").innerHTML
+
+        function backMenu() {
+            var menu = document.getElementById("menu");
+            menu.innerHTML = menubk;
+        }
+
+        function getGolike() {
+            var menu = document.getElementById("menu");
+            menu.innerHTML = `<button id="run-tiktok" onclick="sendMessage('1')">Run Tiktok</button>
+                              <button onclick="backMenu()" class="menu-chill">Back To Menu</button>`;
+        }
+
+        function getXworld() {
+            var menu = document.getElementById("menu");
+            menu.innerHTML = `<button id="run-ninja" onclick="sendMessage('2')">Run Ninja</button>
+                              <button onclick="backMenu()" class="menu-chill">Back To Menu</button>`;
+        }
 
         function sendMessage(message) {
             if (ws.readyState === WebSocket.OPEN) {
