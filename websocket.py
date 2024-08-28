@@ -12,6 +12,7 @@ async def handle_command(websocket):
     global process, job_name
 
     async def run_job(websocket, job_path):
+        global process
         if process is None or process.poll() is not None:
             process = subprocess.Popen(['python3', job_path])
             for i in range(5, 0, -1):
