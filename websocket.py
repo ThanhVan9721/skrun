@@ -15,7 +15,12 @@ async def handle_command(websocket):
         global process
         if process is None or process.poll() is not None:
             process = subprocess.Popen(['python3', job_path])
-            for i in range(5, 0, -1):
+            end_time = asyncio.get_event_loop().time() + 5  # 5 seconds timer
+            while asyncio.get_event_loop().time() < end_time:
+                for i in range(1, 4):
+                    await websocket.send(f"Loading{'.' * i}")
+                    await asyncio.sleep(1)
+            for i in range(end_time, 0, -1):
                 await websocket.send(f"Start later: {i}")
                 await asyncio.sleep(1)
             await websocket.send(f"Start {job_name} job")
