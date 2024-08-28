@@ -9,6 +9,7 @@ process = None
 job_name = None
 # Function to handle WebSocket commands
 async def handle_command(websocket):
+    global process, job_name
     async for message in websocket:
         if message == "1":
             job_name = "Tiktok"
