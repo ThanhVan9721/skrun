@@ -5,40 +5,34 @@ import socket
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
 
-tiktok_process = None
-ninja_process = None
-
 # Function to handle WebSocket commands
-async def handle_command(websocket, path):
-    global tiktok_process, ninja_process
+async def handle_command(websocket):
+    global process, job_name
     async for message in websocket:
         if message == "1":
-            if tiktok_process is None or tiktok_process.poll() is not None:
-                tiktok_process = subprocess.Popen(['python3', 'tiktok.py'])
-                for i in range(5, 0, -1):
-                    await websocket.send(f"Start later: {i}")
-                    await asyncio.sleep(1)
-                await websocket.send("Start Tiktok job")
-            else:
-                await websocket.send("Tiktok job is already running.")
+            job_name = "Tiktok"
+            job_path = "tiktok.py"
+            await run_job(websocket, process, job_name, job_path)
         elif message == "2":
-            if ninja_process is None or ninja_process.poll() is not None:
-                ninja_process = subprocess.Popen(['python3', 'ninja.py'])
-                for i in range(5, 0, -1):
-                    await websocket.send(f"Start later: {i}")
-                    await asyncio.sleep(1)
-                await websocket.send("Start Ninja")
-            else:
-                await websocket.send("Ninja is already running.")
+            job_name = "Ninja"
+            job_path = "ninja.py"
+            await run_job(websocket, process, job_name, job_path)
         elif message == "stop":
-            tiktok_process.terminate()
-            tiktok_process.wait()
-            tiktok_process = None
-            ninja_process.terminate()
-            ninja_process.wait()
-            ninja_process = None
-            await websocket.send("All job is stop.")
+            process.terminate()
+            process.wait()
+            process = None
+            job_name = None
+            await websocket.send("Job is stop.")
 
+async def run_job(websocket, process, job_name, job_path):
+    if process is None or process.poll() is not None:
+        process = subprocess.Popen(['python3', job_path])
+        for i in range(5, 0, -1):
+            await websocket.send(f"Start later: {i}")
+            await asyncio.sleep(1)
+        await websocket.send(f"Start {job_name} job")
+    else:
+        await websocket.send(f"{job_name} is already running.")
 
 # Function to check if ADB is connected
 def check_adb_connection():
