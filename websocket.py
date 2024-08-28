@@ -10,6 +10,17 @@ job_name = None
 # Function to handle WebSocket commands
 async def handle_command(websocket):
     global process, job_name
+
+    async def run_job(websocket, job_path):
+        if process is None or process.poll() is not None:
+            process = subprocess.Popen(['python3', job_path])
+            for i in range(5, 0, -1):
+                await websocket.send(f"Start later: {i}")
+                await asyncio.sleep(1)
+            await websocket.send(f"Start {job_name} job")
+        else:
+            await websocket.send(f"{job_name} is already running.")
+
     async for message in websocket:
         if message == "1":
             job_name = "Tiktok"
@@ -25,16 +36,10 @@ async def handle_command(websocket):
             process = None
             job_name = None
             await websocket.send("Job is stop.")
+    
 
-async def run_job(websocket, job_path):
-    if process is None or process.poll() is not None:
-        process = subprocess.Popen(['python3', job_path])
-        for i in range(5, 0, -1):
-            await websocket.send(f"Start later: {i}")
-            await asyncio.sleep(1)
-        await websocket.send(f"Start {job_name} job")
-    else:
-        await websocket.send(f"{job_name} is already running.")
+
+
 
 # Function to check if ADB is connected
 def check_adb_connection():
