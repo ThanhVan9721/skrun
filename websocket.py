@@ -20,7 +20,7 @@ async def handle_command(websocket):
                 for i in range(1, 4):
                     await websocket.send(f"Loading{'.' * i}")
                     await asyncio.sleep(1)
-            for i in range(end_time, 0, -1):
+            for i in range(5, 0, -1):
                 await websocket.send(f"Start later: {i}")
                 await asyncio.sleep(1)
             await websocket.send(f"Start {job_name} job")
