@@ -6,9 +6,10 @@ import os
 from ultralytics import YOLO
 import requests
 import random
+import easyocr
 import re
 
-model = YOLO('/home/admin/skrun/best.pt')  # Thay bằng mô hình bạn đã huấn luyện
+model = YOLO('best.pt')  # Thay bằng mô hình bạn đã huấn luyện
 
 # Đường dẫn đến thư mục lưu trữ ảnh
 output_folder = "detected_images"
@@ -34,9 +35,10 @@ def capture_screen():
     except Exception as e:
         print(f"Có lỗi xảy ra: {e}")
         return None
+    
 def check_image(type_job, text):
-    time.sleep(15)
-    for _ in range(5):
+    time.sleep(2)
+    for _ in range(10):
         # Chụp ảnh màn hình từ điện thoại qua ADB
         img = capture_screen()
         if img is None:
@@ -80,7 +82,8 @@ def process_action(action):
     action_map = {
         "like": "Tim",
         "follow": "Follow",
-        "comment": "Comment"
+        "comment": "Comment",
+        "Profile": "Profile"
     }
     return action_map.get(action, "Unknown action")
 
@@ -179,20 +182,6 @@ def run_job(id_account):
     else:
         print(f"Không get job được {job.text}")
 
-def get_job_tiktok():
-    url_get_tiktok_account = "https://gateway.golike.net/api/tiktok-account"
-    account = requests.get(url_get_tiktok_account, headers=headers)
-    if account.status_code == 200:
-        data = account.json()
-        for acc in data.get("data", {}):
-            id_account = acc.get("id")
-            unique_username = acc.get("unique_username")
-            print(f"{id_account} - {unique_username}")
-            run_job(id_account)
-    else:
-        # Lỗi khi get list account
-        print(f"Lỗi {account.status_code}: {account.text.encode('utf-8')}")
-
 comment = [
     {"comment": "Wowww"},
     {"comment": "Haaaaa"},
@@ -221,36 +210,78 @@ def perform_random_task():
 
 def execute_multiple_times():
     open_url_in_tiktok("https://www.tiktok.com/")
-    random_count = random.randint(3, 8)  # Số lần ngẫu nhiên từ 2 đến 20
+    random_count = random.randint(1, 5)  # Số lần ngẫu nhiên từ 2 đến 20
     print(f"Thực hiện tương tác {random_count} lần")
     for _ in range(random_count):
         sleepRd = random.randint(3, 10)
         time.sleep(sleepRd)
         perform_random_task()
+def tinh_toa_do_tam(toa_do):
+    # Tách riêng các giá trị x và y từ danh sách các tọa độ
+    x_values = [toa_do[i][0] for i in range(4)]
+    y_values = [toa_do[i][1] for i in range(4)]
+    
+    # Tính trung bình của các giá trị x và y
+    x_center = sum(x_values) / 4
+    y_center = sum(y_values) / 4
+    
+    return [x_center, y_center]
+def normalize_string(s):
+    # Loại bỏ tất cả các ký tự không phải chữ và số
+    return re.sub(r'\W+', '', s)
 
-def get_screen_size():
-    """Lấy kích thước màn hình của thiết bị Android."""
-    output = subprocess.check_output('adb shell wm size', shell=True).decode()
-    match = re.search(r'(\d+)x(\d+)', output)
-    if match:
-        width = int(match.group(1))
-        height = int(match.group(2))
-        return width, height
+def is_similar(str1, str2):
+    # Chuyển đổi các chuỗi thành dạng chuẩn hóa và so sánh
+    return normalize_string(str1) == normalize_string(str2)
+
+
+def get_account(image_path, account_name):
+    img = image_path
+    reader = easyocr.Reader(['en'], gpu=False)
+    text_ = reader.readtext(img)
+    for t_, t in enumerate(text_):
+        if is_similar(t[1], account_name):
+            [x_center, y_center] = tinh_toa_do_tam(t[0])
+            print(t[1])
+            adb_click(x_center, y_center)
+            return True
+    return False
+
+def get_job_tiktok():
+    url_get_tiktok_account = "https://gateway.golike.net/api/tiktok-account"
+    account = requests.get(url_get_tiktok_account, headers=headers)
+    if account.status_code == 200:
+        data = account.json()
+        for acc in data.get("data", {}):
+            id_account = acc.get("id")
+            username = acc.get("unique_username")
+            check_acc(username, id_account)
     else:
-        raise ValueError("Không thể xác định kích thước màn hình.")
+        # Lỗi khi get list account
+        print(f"Lỗi {account.status_code}: {account.text.encode('utf-8')}")
 
-def tap_center_of_screen():
-    """Bấm vào giữa màn hình của thiết bị Android."""
-    width, height = get_screen_size()
-    center_x = width // 2
-    center_y = height // 2
-    # Thực hiện thao tác bấm vào giữa màn hình
-    subprocess.run(f'adb shell input tap {center_x} {center_y}', shell=True)
+def check_acc(username, id_account):
+    open_url_in_tiktok("https://www.tiktok.com/")
+    check_image("Profile", "")
+    check_image("Menu", "")
+    check_image("Setting", "")
+    swipe_up()
+    time.sleep(1)
+    swipe_up()
+    time.sleep(1)
+    swipe_up()
+    time.sleep(3)
+    check_image("SwithAcc", "")
+    time.sleep(2)
+    img = capture_screen()
+    exits_acc = get_account(img, username)
+    if exits_acc == True:
+        for _ in range(5):
+            print(username)
+            execute_multiple_times()
+            run_job(id_account)
+    time.sleep(2)
 
-for _ in range(30):
-    try:
-        execute_multiple_times()        
-        run_job(869386)
-        print(f"End job")
-    except Exception as e:
-        print(f"Có lỗi xảy ra: {e}")
+get_job_tiktok()
+
+print(f"End job")
