@@ -194,6 +194,7 @@ def get_random_comment():
 
 def perform_random_task():    
     task = random.choices([1, 2, 3, 4, 5, 6], weights=[20, 4, 0.5, 0.5, 0.5, 0.2], k=1)[0]
+    click_image("Don't allow")
     if task == 1:
         print("Thực hiện vuốt lên")
         swipe_up()
@@ -218,7 +219,7 @@ def execute_multiple_times():
         perform_random_task()
 
 
-def get_account(input_text):
+def click_image(input_text):
     """Trích xuất văn bản và tọa độ tâm của các từ."""
     screen_img = capture_screen()
     if screen_img is not None:
@@ -268,7 +269,7 @@ def check_acc(username, id_account):
     time.sleep(3)
     check_image("SwithAcc", "")
     time.sleep(2)
-    exits_acc = get_account(username)
+    exits_acc = click_image(username)
     if exits_acc == True:
         for _ in range(5):
             print(username)
