@@ -6,8 +6,8 @@ import os
 from ultralytics import YOLO
 import requests
 import random
-import easyocr
-import re
+import pytesseract
+from PIL import Image
 
 model = YOLO('best.pt')  # Thay bằng mô hình bạn đã huấn luyện
 
@@ -216,35 +216,30 @@ def execute_multiple_times():
         sleepRd = random.randint(3, 10)
         time.sleep(sleepRd)
         perform_random_task()
-def tinh_toa_do_tam(toa_do):
-    # Tách riêng các giá trị x và y từ danh sách các tọa độ
-    x_values = [toa_do[i][0] for i in range(4)]
-    y_values = [toa_do[i][1] for i in range(4)]
-    
-    # Tính trung bình của các giá trị x và y
-    x_center = sum(x_values) / 4
-    y_center = sum(y_values) / 4
-    
-    return [x_center, y_center]
-def normalize_string(s):
-    # Loại bỏ tất cả các ký tự không phải chữ và số
-    return re.sub(r'\W+', '', s)
-
-def is_similar(str1, str2):
-    # Chuyển đổi các chuỗi thành dạng chuẩn hóa và so sánh
-    return normalize_string(str1) == normalize_string(str2)
 
 
-def get_account(image_path, account_name):
-    img = image_path
-    reader = easyocr.Reader(['en'], gpu=False)
-    text_ = reader.readtext(img)
-    for t_, t in enumerate(text_):
-        if is_similar(t[1], account_name):
-            [x_center, y_center] = tinh_toa_do_tam(t[0])
-            print(t[1])
-            adb_click(x_center, y_center)
-            return True
+def get_account(input_text):
+    """Trích xuất văn bản và tọa độ tâm của các từ."""
+    screen_img = capture_screen()
+    if screen_img is not None:
+        # Chuyển từ định dạng BGR sang RGB
+        screen_img_rgb = cv2.cvtColor(screen_img, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(screen_img_rgb)
+
+        # Nhận dữ liệu từ pytesseract (gồm thông tin bounding box)
+        data = pytesseract.image_to_data(pil_image, output_type=pytesseract.Output.DICT)
+
+        # Lặp qua các từ nhận diện được
+        num_items = len(data['text'])
+        for i in range(num_items):
+            if int(data['conf'][i]) > 0:  # Kiểm tra nếu độ tin cậy > 0
+                x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
+                text = data['text'][i]
+                if text == input_text:
+                    center_x = x + w // 2
+                    center_y = y + h // 2
+                    adb_click(center_x, center_y)
+                    return True
     return False
 
 def get_job_tiktok():
@@ -273,15 +268,14 @@ def check_acc(username, id_account):
     time.sleep(3)
     check_image("SwithAcc", "")
     time.sleep(2)
-    img = capture_screen()
-    exits_acc = get_account(img, username)
+    exits_acc = get_account(username)
     if exits_acc == True:
         for _ in range(5):
             print(username)
             execute_multiple_times()
             run_job(id_account)
     time.sleep(2)
-
-get_job_tiktok()
+for _ in range(2):
+    get_job_tiktok()
 
 print(f"End job")
